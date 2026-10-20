@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>N4 單字翻牌配對</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #101827;
+      color: #f4f7fb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(ellipse at 50% -20%, rgba(27, 164, 190, .2), transparent 62%),
+        #101827;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .game {
+      display: grid;
+      grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+      gap: clamp(5px, 1.3vh, 12px);
+      width: min(100%, 1120px);
+      height: 100%;
+      min-height: 0;
+      margin: 0 auto;
+      padding: clamp(10px, 2.4vw, 24px);
+    }
+
+    .topbar,
+    .toolbar,
+    .stats,
+    .stat {
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar {
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .eyebrow {
+      margin: 0 0 2px;
+      color: #47d4d9;
+      font-size: clamp(8px, 1.1vw, 11px);
+      font-weight: 800;
+      letter-spacing: .14em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(17px, 2.6vw, 28px);
+      line-height: 1.1;
+      letter-spacing: .02em;
+    }
+
+    .subtitle {
+      margin: 3px 0 0;
+      color: #9eabba;
+      font-size: clamp(9px, 1.2vw, 12px);
+    }
+
+    .progress-pill {
+      flex: 0 0 auto;
+      padding: 7px 11px;
+      border: 1px solid rgba(71, 212, 217, .36);
+      border-radius: 999px;
+      background: rgba(71, 212, 217, .08);
+      color: #b8f2ed;
+      font-size: clamp(10px, 1.3vw, 13px);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .stats {
+      flex-wrap: wrap;
+      gap: clamp(5px, 1vw, 12px);
+      min-width: 0;
+    }
+
+    .stat {
+      gap: 5px;
+      color: #aebac9;
+      font-size: clamp(9px, 1.2vw, 12px);
+      white-space: nowrap;
+    }
+
+    .stat strong {
+      color: #fff;
+      font-size: 1.05em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .restart {
+      flex: 0 0 auto;
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, .17);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .07);
+      color: #e8eef7;
+      font-size: clamp(9px, 1.2vw, 12px);
+      font-weight: 750;
+      cursor: pointer;
+      transition: background .18s ease, border-color .18s ease;
+    }
+
+    .restart:hover {
+      border-color: rgba(71, 212, 217, .6);
+      background: rgba(71, 212, 217, .12);
+    }
+
+    .restart:focus-visible,
+    .card:focus-visible {
+      outline: 2px solid #ffc04d;
+      outline-offset: 2px;
+    }
+
+    .feedback {
+      display: flex;
+      align-items: center;
+      min-height: 30px;
+      margin: 0;
+      padding: 5px 9px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .045);
+      color: #c8d3df;
+      font-size: clamp(9px, 1.15vw, 12px);
+      line-height: 1.35;
+    }
+
+    .feedback.is-correct {
+      border-color: rgba(72, 207, 161, .28);
+      color: #9af1ce;
+    }
+
+    .feedback.is-wrong {
+      border-color: rgba(255, 192, 77, .25);
+      color: #ffd68a;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+      gap: clamp(5px, 1.15vw, 12px);
+      width: min(100%, 980px);
+      min-height: 0;
+      justify-self: center;
+      align-self: stretch;
+    }
+
+    .card {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      border-radius: clamp(7px, 1.2vw, 13px);
+      background: transparent;
+      cursor: pointer;
+      perspective: 800px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .card-inner {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transition: transform .38s cubic-bezier(.2, .7, .2, 1);
+    }
+
+    .card.is-open .card-inner,
+    .card.is-matched .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(2px, .5vh, 6px);
+      overflow: hidden;
+      padding: 5px;
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: inherit;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      text-align: center;
+    }
+
+    .card-back {
+      background:
+        linear-gradient(135deg, rgba(66, 190, 205, .12), transparent 52%),
+        #1c2b3d;
+      color: #55d5d9;
+      box-shadow: 0 5px 14px rgba(0, 0, 0, .14);
+    }
+
+    .card-back strong {
+      font-size: clamp(17px, 3vw, 32px);
+      line-height: 1;
+    }
+
+    .card-back small,
+    .card-front small {
+      color: #a6b4c6;
+      font-size: clamp(8px, 1vw, 10px);
+      font-weight: 750;
+      letter-spacing: .08em;
+    }
+
+    .card-front {
+      transform: rotateY(180deg);
+      background: linear-gradient(145deg, #24374b, #1b293a);
+      box-shadow: 0 5px 14px rgba(0, 0, 0, .14);
+    }
+
+    .card-front strong {
+      max-width: 100%;
+      color: #fff;
+      font-size: clamp(12px, 2vw, 23px);
+      line-height: 1.12;
+      overflow-wrap: anywhere;
+    }
+
+    .card-front .reading {
+      color: #65e0dc;
+      font-size: clamp(9px, 1.3vw, 13px);
+      font-weight: 650;
+    }
+
+    .card-front.chinese strong {
+      color: #ffd078;
+      font-size: clamp(11px, 1.75vw, 19px);
+    }
+
+    .card.is-matched .card-front {
+      border-color: rgba(72, 207, 161, .7);
+      background: linear-gradient(145deg, #1d493f, #19372f);
+    }
+
+    .card.is-matched .card-front strong {
+      color: #b8ffe2;
+    }
+
+    .footer-note {
+      margin: 0;
+      color: #8795a8;
+      font-size: clamp(8px, 1vw, 10px);
+      text-align: center;
+    }
+
+    @media (max-height: 420px) {
+      .game {
+        gap: 5px;
+        padding: 8px 12px;
+      }
+
+      .subtitle,
+      .footer-note {
+        display: none;
+      }
+
+      .eyebrow {
+        margin-bottom: 1px;
+      }
+
+      h1 {
+        font-size: 18px;
+      }
+
+      .progress-pill {
+        padding: 5px 9px;
+      }
+
+      .feedback {
+        min-height: 25px;
+        padding: 3px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game" aria-labelledby="game-title">
+    <header class="topbar">
+      <div class="brand">
+        <p class="eyebrow">JLPT N4 · WORD MATCH</p>
+        <h1 id="game-title">翻牌找配對</h1>
+        <p class="subtitle">找出日文單字與中文意思，答對後讀讀音和例句。</p>
+      </div>
+      <div class="progress-pill" aria-live="polite">配對 <span id="pair-count">0 / 6</span></div>
+    </header>
+
+    <section class="toolbar" aria-label="遊戲狀態">
+      <div class="stats">
+        <span class="stat">步數 <strong id="move-count">0</strong></span>
+        <span class="stat">時間 <strong id="time-count">00:00</strong></span>
+      </div>
+      <button class="restart" id="restart" type="button">重新洗牌</button>
+    </section>
+
+    <p class="feedback" id="feedback" role="status" aria-live="polite">翻開兩張牌，找出日文單字與中文意思的配對。</p>
+    <section class="board" id="board" aria-label="日文與中文單字配對卡"></section>
+    <p class="footer-note">配對成功會顯示假名讀音與例句 · 先記位置，再找答案</p>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const vocabulary = [
+        { id: "yakusoku", word: "約束", reading: "やくそく", meaning: "約定；約好", example: "友達と約束があります。" },
+        { id: "renraku", word: "連絡", reading: "れんらく", meaning: "聯絡", example: "学校に連絡します。" },
+        { id: "junbi", word: "準備", reading: "じゅんび", meaning: "準備", example: "旅行の準備をします。" },
+        { id: "yotei", word: "予定", reading: "よてい", meaning: "預定；安排", example: "明日の予定を確認します。" },
+        { id: "unten", word: "運転", reading: "うんてん", meaning: "駕駛", example: "父は車を運転します。" },
+        { id: "keiken", word: "経験", reading: "けいけん", meaning: "經驗", example: "日本へ行った経験があります。" }
+      ];
+
+      const board = document.getElementById("board");
+      const pairCount = document.getElementById("pair-count");
+      const moveCount = document.getElementById("move-count");
+      const timeCount = document.getElementById("time-count");
+      const feedback = document.getElementById("feedback");
+      const restartButton = document.getElementById("restart");
+
+      let openCards = [];
+      let matchedPairs = 0;
+      let moves = 0;
+      let seconds = 0;
+      let timerId = null;
+      let mismatchTimeout = null;
+      let locked = false;
+
+      const shuffle = (items) => {
+        const result = [...items];
+        for (let index = result.length - 1; index > 0; index -= 1) {
+          const other = Math.floor(Math.random() * (index + 1));
+          [result[index], result[other]] = [result[other], result[index]];
+        }
+        return result;
+      };
+
+      const formatTime = (totalSeconds) => {
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+        const remainder = String(totalSeconds % 60).padStart(2, "0");
+        return minutes + ":" + remainder;
+      };
+
+      const makeFace = (className, label, primary, secondary) => {
+        const face = document.createElement("span");
+        face.className = "card-face " + className;
+
+        const type = document.createElement("small");
+        type.textContent = label;
+        face.append(type);
+
+        const mainText = document.createElement("strong");
+        mainText.textContent = primary;
+        face.append(mainText);
+
+        if (secondary) {
+          const detail = document.createElement("span");
+          detail.className = "reading";
+          detail.textContent = secondary;
+          face.append(detail);
+        }
+
+        return face;
+      };
+
+      const makeCard = (cardData, index) => {
+        const button = document.createElement("button");
+        button.className = "card";
+        button.type = "button";
+        button.dataset.pair = cardData.id;
+        button.dataset.kind = cardData.kind;
+        button.setAttribute("aria-label", "第 " + (index + 1) + " 張牌，尚未翻開");
+        button.setAttribute("aria-pressed", "false");
+
+        const inner = document.createElement("span");
+        inner.className = "card-inner";
+
+        const back = document.createElement("span");
+        back.className = "card-face card-back";
+        back.setAttribute("aria-hidden", "true");
+        const mark = document.createElement("strong");
+        mark.textContent = "？";
+        const backLabel = document.createElement("small");
+        backLabel.textContent = "翻牌";
+        back.append(mark, backLabel);
+
+        const front = cardData.kind === "japanese"
+          ? makeFace("card-front", "日本語", cardData.word, cardData.reading)
+          : makeFace("card-front chinese", "中文意思", cardData.meaning, "");
+        front.setAttribute("aria-hidden", "true");
+
+        inner.append(back, front);
+        button.append(inner);
+
+        button.addEventListener("click", () => revealCard(button, cardData));
+        return button;
+      };
+
+      const setFeedback = (message, tone) => {
+        feedback.textContent = message;
+        feedback.classList.remove("is-correct", "is-wrong");
+        if (tone) feedback.classList.add(tone);
+      };
+
+      const startTimer = () => {
+        if (timerId !== null) return;
+        timerId = window.setInterval(() => {
+          seconds += 1;
+          timeCount.textContent = formatTime(seconds);
+        }, 1000);
+      };
+
+      const revealCard = (button, cardData) => {
+        if (locked || button.classList.contains("is-open") || button.classList.contains("is-matched")) return;
+        startTimer();
+
+        button.classList.add("is-open");
+        button.setAttribute("aria-pressed", "true");
+        button.setAttribute("aria-label", cardData.kind === "japanese"
+          ? cardData.word + "，" + cardData.reading
+          : cardData.meaning);
+        openCards.push({ button, cardData });
+
+        if (openCards.length < 2) return;
+
+        moves += 1;
+        moveCount.textContent = String(moves);
+        locked = true;
+        const [first, second] = openCards;
+
+        if (first.cardData.id === second.cardData.id) {
+          const japaneseCard = first.cardData.kind === "japanese" ? first.cardData : second.cardData;
+          const chineseCard = first.cardData.kind === "chinese" ? first.cardData : second.cardData;
+          first.button.classList.add("is-matched");
+          second.button.classList.add("is-matched");
+          first.button.disabled = true;
+          second.button.disabled = true;
+          matchedPairs += 1;
+          pairCount.textContent = matchedPairs + " / " + vocabulary.length;
+          setFeedback("配對成功：" + japaneseCard.word + "（" + japaneseCard.reading + "）＝ " + chineseCard.meaning + "　例：" + japaneseCard.example, "is-correct");
+          openCards = [];
+          locked = false;
+
+          if (matchedPairs === vocabulary.length) {
+            window.clearInterval(timerId);
+            timerId = null;
+            setFeedback("全部答對！用時 " + formatTime(seconds) + "，翻牌 " + moves + " 步。按「重新洗牌」再挑戰一次。", "is-correct");
+          }
+          return;
+        }
+
+        const firstText = first.cardData.kind === "japanese"
+          ? first.cardData.word + "（" + first.cardData.reading + "）"
+          : first.cardData.meaning;
+        const secondText = second.cardData.kind === "japanese"
+          ? second.cardData.word + "（" + second.cardData.reading + "）"
+          : second.cardData.meaning;
+        setFeedback("還沒配對上：「" + firstText + "」和「" + secondText + "」不是一組，再記住位置試試看。", "is-wrong");
+        mismatchTimeout = window.setTimeout(() => {
+          for (const card of openCards) {
+            card.button.classList.remove("is-open");
+            card.button.setAttribute("aria-pressed", "false");
+            card.button.setAttribute("aria-label", "牌已蓋上");
+          }
+          openCards = [];
+          locked = false;
+          mismatchTimeout = null;
+        }, 850);
+      };
+
+      const startRound = () => {
+        if (timerId !== null) window.clearInterval(timerId);
+        if (mismatchTimeout !== null) window.clearTimeout(mismatchTimeout);
+        timerId = null;
+        mismatchTimeout = null;
+        openCards = [];
+        matchedPairs = 0;
+        moves = 0;
+        seconds = 0;
+        locked = false;
+        pairCount.textContent = "0 / " + vocabulary.length;
+        moveCount.textContent = "0";
+        timeCount.textContent = "00:00";
+        setFeedback("翻開兩張牌，找出日文單字與中文意思的配對。", "");
+
+        const cards = vocabulary.flatMap((item) => [
+          { ...item, kind: "japanese" },
+          { ...item, kind: "chinese" }
+        ]);
+        board.replaceChildren(...shuffle(cards).map(makeCard));
+      };
+
+      restartButton.addEventListener("click", startRound);
+      startRound();
+    })();
+  </script>
+</body>
+</html>
