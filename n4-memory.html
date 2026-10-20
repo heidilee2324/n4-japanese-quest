@@ -99,6 +99,29 @@
       white-space: nowrap;
     }
 
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .lobby-link {
+      flex: 0 0 auto;
+      padding: 7px 9px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 8px;
+      color: #c1ccda;
+      background: rgba(255, 255, 255, .04);
+      font-size: clamp(9px, 1.1vw, 11px);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .lobby-link:hover {
+      border-color: rgba(152, 241, 209, .45);
+      color: var(--mint, #98f1d1);
+    }
+
     .toolbar {
       justify-content: space-between;
       gap: 8px;
@@ -325,7 +348,10 @@
         <h1 id="game-title">翻牌找配對</h1>
         <p class="subtitle">找出日文單字與中文意思，答對後讀讀音和例句。</p>
       </div>
-      <div class="progress-pill" aria-live="polite">配對 <span id="pair-count">0 / 6</span></div>
+      <div class="top-actions">
+        <div class="progress-pill" aria-live="polite">配對 <span id="pair-count">0 / 6</span></div>
+        <a class="lobby-link" id="lobby-link" href="index.html">遊戲大廳</a>
+      </div>
     </header>
 
     <section class="toolbar" aria-label="遊戲狀態">
@@ -360,6 +386,9 @@
       const timeCount = document.getElementById("time-count");
       const feedback = document.getElementById("feedback");
       const restartButton = document.getElementById("restart");
+      if (new URLSearchParams(window.location.search).get("preview") === "1") {
+        document.getElementById("lobby-link").hidden = true;
+      }
 
       let openCards = [];
       let matchedPairs = 0;

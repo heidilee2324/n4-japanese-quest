@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10152a" />
+    <meta name="description" content="和摩爾加納一起探索日文 N4 單字與文法。" />
+    <title>モナと学ぶ日本語｜N4 Quest</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      if (new URLSearchParams(window.location.search).get("preview") === "1") {
+        document.documentElement.classList.add("compact-preview");
+      }
+    </script>
+    <style>
+      html.compact-preview,
+      html.compact-preview body {
+        width: 100%;
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      html.compact-preview .app-shell {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      html.compact-preview .topbar,
+      html.compact-preview .journey-strip,
+      html.compact-preview .mobile-controls,
+      html.compact-preview .page-footer {
+        display: none !important;
+      }
+
+      html.compact-preview .game-layout {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        grid-template-columns: minmax(0, 1fr) 230px;
+        gap: 10px;
+        padding: 0;
+      }
+
+      html.compact-preview .play-column,
+      html.compact-preview .game-window {
+        display: flex;
+        height: 100%;
+        min-height: 0;
+        flex-direction: column;
+      }
+
+      html.compact-preview .game-window {
+        flex: 1;
+      }
+
+      html.compact-preview .window-topline {
+        flex: 0 0 30px;
+        height: 30px;
+      }
+
+      html.compact-preview .canvas-frame {
+        display: grid;
+        flex: 1;
+        min-height: 0;
+        place-items: center;
+      }
+
+      html.compact-preview #game-root {
+        display: grid;
+        width: 100%;
+        height: 100%;
+        place-items: center;
+      }
+
+      html.compact-preview #game-root canvas {
+        width: auto !important;
+        height: auto !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+      }
+
+      html.compact-preview .play-footer {
+        flex: 0 0 34px;
+        min-height: 34px;
+      }
+
+      html.compact-preview .lesson-panel {
+        height: 100%;
+        min-height: 0;
+        overflow: auto;
+        padding: 12px;
+      }
+
+      html.compact-preview .lesson-heading {
+        margin-top: 10px;
+      }
+
+      html.compact-preview .lesson-heading h2 {
+        font-size: 17px;
+      }
+
+      html.compact-preview .round-progress {
+        margin-top: 10px;
+      }
+
+      html.compact-preview .question-card {
+        margin-top: 9px;
+        padding: 10px;
+      }
+
+      html.compact-preview .question-prompt {
+        min-height: 0;
+        margin: 8px 0;
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      html.compact-preview .question-instruction {
+        padding-top: 7px;
+      }
+
+      html.compact-preview .feedback-card {
+        margin-top: 8px;
+        padding: 8px;
+      }
+
+      html.compact-preview .panel-bottom {
+        padding-top: 10px;
+      }
+
+      @media (max-width: 520px) {
+        html.compact-preview .game-layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        html.compact-preview .lesson-panel {
+          display: none;
+        }
+
+        html.compact-preview .start-overlay {
+          padding: 8px;
+        }
+
+        html.compact-preview .start-mascot {
+          display: none;
+        }
+
+        html.compact-preview .start-card h1 {
+          margin: 5px 0;
+          font-size: 18px;
+          line-height: 1.2;
+        }
+
+        html.compact-preview .start-card p {
+          margin-bottom: 8px;
+          font-size: 9px;
+          line-height: 1.45;
+        }
+
+        html.compact-preview .primary-button {
+          min-height: 32px;
+          padding: 0 12px;
+          font-size: 10px;
+        }
+
+        html.compact-preview .start-footnote {
+          margin-top: 6px;
+          font-size: 7px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="index.html" aria-label="返回 N4 遊戲大廳">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span></span>
+          <span class="brand-copy">
+            <span class="brand-kicker">MORGANA'S FIELD NOTES</span>
+            <strong>モナと学ぶ日本語</strong>
+          </span>
+        </a>
+        <div class="topbar-right">
+          <div class="score-display">
+            <span class="score-label">TOTAL SCORE</span>
+            <strong><span id="score-value">0</span><small>pt</small></strong>
+          </div>
+          <span class="topbar-divider" aria-hidden="true"></span>
+          <div class="course-display">
+            <span class="course-label">JAPANESE COURSE</span>
+            <strong>N4 <span>·</span> BEGINNER</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="journey-strip" aria-label="七個關卡進度">
+        <div class="journey-label"><span class="journey-dot"></span><span>探索進度</span><span class="journey-count"><b id="level-value">01</b> / 07</span></div>
+        <div class="level-track" id="level-track"></div>
+        <span class="journey-caption">TOKYO FIELD GUIDE</span>
+      </section>
+
+      <section class="game-layout" id="top">
+        <div class="play-column">
+          <div class="game-window">
+            <div class="window-topline"><span class="window-tag"><i></i> LIVE LEARNING</span><span class="window-location" id="window-location">東京 · MORNING ROUTE</span></div>
+            <div class="canvas-frame" id="game-frame">
+              <div id="game-root" aria-label="遊戲畫面：操控摩爾加納移動並碰觸正確答案"></div>
+              <div class="start-overlay" id="start-overlay">
+                <div class="start-card">
+                  <div class="start-mascot" aria-hidden="true">✦</div>
+                  <span class="eyebrow">MORGANA'S N4 TRAINING</span>
+                  <h1>和摩爾加納<br /><span>出發學日文！</span></h1>
+                  <p>移動摩爾加納，碰觸正確的日文答案。<br />七個主題、21 道 N4 單字與文法題等你挑戰。</p>
+                  <button class="primary-button" id="start-button" type="button">開始探險 <span aria-hidden="true">↗</span></button>
+                  <span class="start-footnote">正解 +5 <b>·</b> 答錯 −3 <b>·</b> 不限時間</span>
+                </div>
+              </div>
+            </div>
+            <div class="play-footer">
+              <div class="control-hint"><span class="keycap">W</span><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span><span class="hint-copy">或方向鍵移動</span></div>
+              <div class="play-footer-right"><span class="online-dot"></span><span>FIELD GUIDE ONLINE</span></div>
+            </div>
+          </div>
+          <div class="mobile-controls" aria-label="觸控移動控制">
+            <span class="mobile-controls-label">觸控移動</span>
+            <div class="dpad" aria-label="摩爾加納移動方向">
+              <button class="pad-button pad-up" type="button" data-dir="up" aria-label="向上">↑</button>
+              <button class="pad-button pad-left" type="button" data-dir="left" aria-label="向左">←</button>
+              <button class="pad-button pad-down" type="button" data-dir="down" aria-label="向下">↓</button>
+              <button class="pad-button pad-right" type="button" data-dir="right" aria-label="向右">→</button>
+            </div>
+            <span class="mobile-controls-tip">按住方向鍵移動</span>
+          </div>
+        </div>
+
+        <aside class="lesson-panel" aria-live="polite">
+          <div class="lesson-topline"><span class="lesson-kicker">MORGANA'S LESSON</span><span class="lesson-number" id="lesson-number">01 — 07</span></div>
+          <div class="lesson-heading">
+            <span class="stage-tag" id="stage-tag">STAGE 01</span>
+            <h2 id="stage-title">晨間的準備</h2>
+            <p id="stage-subtitle">日常生活・單字與習慣</p>
+          </div>
+          <div class="round-progress" aria-label="本關題目進度">
+            <div class="round-progress-head"><span>本關挑戰</span><span id="round-count">01 <small>/ 03</small></span></div>
+            <div class="round-bars" id="round-bars"><i></i><i></i><i></i></div>
+          </div>
+          <div class="question-card" id="question-card">
+            <div class="question-meta"><span class="question-kind" id="question-kind">VOCABULARY</span><span class="question-count" id="question-count">QUESTION 01</span></div>
+            <p class="question-prompt" id="question-prompt">選出「洗衣服」的日文單字。</p>
+            <div class="question-instruction"><span class="instruction-icon" aria-hidden="true">✦</span><span>操控摩爾加納碰觸一個答案</span></div>
+          </div>
+          <div class="feedback-card" id="feedback-card" hidden>
+            <div class="feedback-heading"><span class="feedback-symbol" id="feedback-symbol">✓</span><strong id="feedback-title">正解！</strong><span class="feedback-points" id="feedback-points">+5</span></div>
+            <p id="feedback-copy"></p>
+          </div>
+          <div class="panel-bottom" id="panel-bottom">
+            <span class="mona-note-icon" aria-hidden="true">M</span>
+            <p><strong>摩爾加納的小提醒</strong><span>看清日文選項，再帶我走過去吧！</span></p>
+          </div>
+          <div class="completion-card" id="completion-card" hidden>
+            <span class="completion-stamp">MISSION COMPLETE</span>
+            <h3>七關全制霸！</h3>
+            <p id="completion-copy">摩爾加納的 N4 特訓完成。</p>
+            <div class="completion-score"><span>FINAL SCORE</span><strong id="final-score">0 <small>pt</small></strong></div>
+            <button type="button" class="primary-button restart-button" id="restart-button">再玩一次 <span aria-hidden="true">↻</span></button>
+          </div>
+        </aside>
+      </section>
+
+      <footer class="page-footer"><span>日本語能力試驗 N4 · 21 個練習挑戰</span><span>学んで、歩いて、覚えよう。<b>— MONA</b></span></footer>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"></script>
+    <script src="game.js"></script>
+  </body>
+</html>
