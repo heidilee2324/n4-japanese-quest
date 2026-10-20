@@ -2,6 +2,12 @@
 
 和摩爾加納一起探索日文 N4 單字與文法。網站首頁提供遊戲預覽，可直接挑選遊戲開啟。
 
+## GitHub Pages
+
+- [N4 遊戲大廳與遊戲預覽](https://heidilee2324.github.io/n4-japanese-quest/)
+- [N4 主線冒險遊戲](https://heidilee2324.github.io/n4-japanese-quest/n4-quest.html)
+- [N4 單字翻牌配對](https://heidilee2324.github.io/n4-japanese-quest/n4-memory.html)
+
 ## 遊戲入口
 
 - `index.html`：N4 遊戲大廳，預覽目前的遊戲。
