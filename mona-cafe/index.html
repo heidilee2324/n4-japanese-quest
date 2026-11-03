@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="走進日本喫茶店，扮演顧客與店員進行日語點餐對話，練習點餐句型、付款方式、餐後禮儀與實用詞彙，並依提示和對話回饋修正選擇。">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>モナの日常：喫茶店日語冒險 ☕</title>
+  <style>
+    :root {
+      --bg-dark: #120e18;
+      --bg-surface: #1d1826;
+      --bg-card: #272033;
+      --cafe-wood: #4e342e;
+      --cafe-cream: #fbf5e6;
+      --cafe-gold: #ffd54f;
+      --mona-red: #e53935;
+      --accent-green: #00e676;
+      --text-muted: #b0a7bc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background-color: var(--bg-dark);
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Noto Sans JP", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    header {
+      width: 100%;
+      height: 52px;
+      background: rgba(29, 24, 38, 0.95);
+      border-bottom: 1px solid rgba(255, 213, 79, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 14px; color: var(--cafe-gold); text-decoration: none; }
+    .header-btns { display: flex; gap: 8px; align-items: center; }
+    .btn-h {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 213, 79, 0.4);
+      color: var(--cafe-cream);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+    }
+    .btn-h:hover { background: #3c2f50; border-color: var(--cafe-gold); }
+
+    /* 學員身分標籤 */
+    .learner-badge {
+      font-size: 12px;
+      color: #80d8ff;
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* 任務橫幅 */
+    .quest-banner {
+      width: 100%;
+      max-width: 640px;
+      background: linear-gradient(90deg, rgba(62,39,35,0.9), rgba(39,24,51,0.95));
+      border: 1px solid var(--cafe-gold);
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .quest-title { font-weight: bold; color: var(--cafe-gold); display: flex; align-items: center; gap: 6px; }
+    .quest-desc { color: var(--cafe-cream); font-size: 12px; }
+
+    .game-box {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 4 / 3;
+      margin-top: 8px;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.7), 0 0 0 2px rgba(255, 213, 79, 0.2);
+    }
+    canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+    
+    /* 對話框 UI */
+    .dialogue-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 12px;
+      z-index: 50;
+    }
+    .dialogue-box {
+      pointer-events: auto;
+      background: rgba(22, 17, 30, 0.96);
+      backdrop-filter: blur(8px);
+      border: 2px solid var(--cafe-gold);
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      animation: slideUp 0.2s ease-out;
+    }
+    .hidden { display: none !important; }
+    @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .dialogue-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 213, 79, 0.25);
+      padding-bottom: 6px;
+    }
+    .speaker-badge { background: var(--cafe-gold); color: #120e18; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
+    .speaker-name { font-size: 14px; font-weight: bold; color: var(--cafe-cream); }
+    .aff-wrap { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #ff80ab; }
+    .aff-track { width: 70px; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; overflow: hidden; }
+    .aff-fill { height: 100%; background: linear-gradient(90deg, #ff4081, #f50057); transition: width 0.4s; }
+    .dialogue-prompt { font-size: 15px; font-weight: 600; line-height: 1.5; color: #fff; min-height: 24px; }
+    ruby { ruby-position: over; }
+    rt { font-size: 0.65em; color: var(--cafe-gold); font-weight: normal; }
+    .dialogue-sub { font-size: 12px; color: var(--text-muted); }
+    .dialogue-options { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+    .opt-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #fff;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.15s;
+    }
+    .opt-btn:hover { background: #3a2e4e; border-color: var(--cafe-gold); transform: translateX(3px); }
+    .opt-num { width: 20px; height: 20px; background: rgba(255,255,255,0.1); color: var(--cafe-gold); font-size: 11px; font-weight: bold; display: grid; place-items: center; border-radius: 3px; }
+    .opt-jp { font-size: 13.5px; font-weight: 600; color: var(--cafe-cream); }
+    .opt-sub { font-size: 11px; color: var(--text-muted); display: block; }
+    .next-btn { background: #1b5e20; border-color: var(--accent-green); justify-content: center; font-weight: bold; padding: 10px; }
+
+    /* 鷹架彈窗 */
+    .scaffolding-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 8, 14, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+    }
+    .scaffolding-card {
+      background: #231b30;
+      border: 2px solid #ffb74d;
+      border-radius: 10px;
+      max-width: 440px;
+      width: 100%;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.8);
+    }
+    .sc-title { font-size: 15px; color: var(--cafe-gold); display: flex; align-items: center; gap: 8px; }
+    .sc-mis { background: rgba(229, 57, 53, 0.15); border-left: 4px solid var(--mona-red); padding: 8px; border-radius: 4px; font-size: 13px; }
+    .sc-text { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; font-size: 12.5px; line-height: 1.6; color: var(--cafe-cream); }
+    .sc-hint { background: rgba(255, 213, 79, 0.12); border: 1px dashed rgba(255, 213, 79, 0.4); padding: 8px; border-radius: 6px; font-size: 12px; color: #ffe082; }
+    .sc-btn { background: var(--cafe-gold); color: #120e18; border: none; font-weight: bold; font-size: 13px; padding: 9px 16px; border-radius: 6px; cursor: pointer; align-self: flex-end; }
+
+    /* 冒險手帳與設定彈窗 */
+    .modal-shell {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 8, 14, 0.88);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-card {
+      background: #241c30;
+      border: 2px solid var(--cafe-gold);
+      border-radius: 12px;
+      max-width: 520px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .m-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,213,79,0.3); padding-bottom: 8px; }
+    .journal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+    .v-card { background: #1c1527; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; }
+    .v-card.unlocked { border-color: rgba(255,213,79,0.4); background: #281f38; }
+    .v-card.locked { opacity: 0.4; }
+    .v-kanji { font-size: 15px; color: var(--cafe-gold); font-weight: bold; }
+    .v-kana { font-size: 11px; color: #80d8ff; display: block; }
+    .v-mean { font-size: 11px; color: var(--cafe-cream); margin-top: 2px; display: block; }
+
+    /* 設定表單項目 */
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12.5px; color: var(--cafe-gold); font-weight: bold; }
+    .form-input {
+      background: #140f1d;
+      border: 1px solid rgba(255, 213, 79, 0.4);
+      border-radius: 6px;
+      color: #fff;
+      padding: 9px 12px;
+      font-size: 13px;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--cafe-gold); box-shadow: 0 0 8px rgba(255, 213, 79, 0.3); }
+    .form-tip { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; }
+
+    /* 控制列 */
+    .controls { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 640px; margin-top: 8px; padding: 0 10px; }
+    .dpad { display: grid; grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(3, 40px); gap: 3px; }
+    .d-btn { background: #2a2039; border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 6px; font-size: 16px; display: grid; place-items: center; cursor: pointer; }
+    .d-btn:active { background: var(--cafe-gold); color: #120e18; }
+    .act-btn { width: 56px; height: 56px; border-radius: 50%; background: #c62828; border: 2px solid #ef5350; color: #fff; font-weight: bold; font-size: 13px; cursor: pointer; }
+    .act-btn:active { background: #e53935; }
+    .help-hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; text-align: center; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="../index.html" class="brand" title="回到遊戲大廳"><span>☕</span><span>モナの日常 · 喫茶店日語冒險</span></a>
+    <div class="header-btns">
+      <span id="badge-learner" class="learner-badge" title="點擊修改學員姓名">👤 訪客學員</span>
+      <button id="j-btn" class="btn-h" type="button">📖 手帳</button>
+      <button id="cfg-btn" class="btn-h" type="button">⚙ 雲端串接</button>
+      <button id="m-btn" class="btn-h" type="button">🔊 音效</button>
+      <a href="../index.html" class="btn-h">⌂ 回大廳</a>
+    </div>
+  </header>
+
+  <!-- 任務指引提示列 -->
+  <div class="quest-banner">
+    <div class="quest-title"><span id="q-icon">🎯</span><span id="q-step">步驟 1</span></div>
+    <div class="quest-desc" id="q-text">請先操作角色向上走到【櫃台】向店員點餐！</div>
+  </div>
+
+  <div class="game-box">
+    <canvas id="game-canvas" width="640" height="480"></canvas>
+
+    <!-- 對話框 Overlay -->
+    <div id="dlg-overlay" class="dialogue-overlay">
+      <div id="dlg-box" class="dialogue-box hidden">
+        <div class="dialogue-head">
+          <div><span class="speaker-badge">店員</span> <strong id="spk-name" class="speaker-name">リン (Rin)</strong></div>
+          <div class="aff-wrap">♥ <div class="aff-track"><div id="aff-fill" class="aff-fill" style="width: 20%;"></div></div> <span id="aff-txt">20pt</span></div>
+        </div>
+        <div>
+          <p id="dlg-prompt" class="dialogue-prompt"></p>
+          <p id="dlg-sub" class="dialogue-sub"></p>
+        </div>
+        <div id="dlg-opts" class="dialogue-options"></div>
+      </div>
+    </div>
+
+    <!-- 鷹架教學解析彈窗 -->
+    <div id="sc-modal" class="scaffolding-modal hidden">
+      <div class="scaffolding-card">
+        <div class="sc-title"><span>💡</span><h3 id="sc-title">日語結構鷹架筆記</h3></div>
+        <div id="sc-mis" class="sc-mis"></div>
+        <div id="sc-text" class="sc-text"></div>
+        <div id="sc-hint" class="sc-hint"></div>
+        <button id="sc-retry" class="sc-btn" type="button">我懂了，再次嘗試！ (もう一度)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 行動控制按鍵 -->
+  <div class="controls">
+    <div class="dpad">
+      <div></div><button class="d-btn" id="btn-up">▲</button><div></div>
+      <button class="d-btn" id="btn-left">◀</button><div></div><button class="d-btn" id="btn-right">▶</button>
+      <div></div><button class="d-btn" id="btn-down">▼</button><div></div>
+    </div>
+    <button class="act-btn" id="btn-interact">互動</button>
+  </div>
+
+  <p class="help-hint">操作：電腦請用鍵盤 [WASD] 或 [方向鍵] 移動，走到定點按 [空白鍵] 或 [互動] 按鈕</p>
+
+  <!-- 冒險手帳 Modal -->
+  <div id="j-modal" class="modal-shell hidden">
+    <div class="modal-card">
+      <div class="m-head">
+        <h3>📖 モナの冒險手帳 (N4 實戰生活單字庫)</h3>
+        <button id="j-close" class="btn-h" type="button">✕ 關閉</button>
+      </div>
+      <p style="font-size:12px; color:#b0a7bc;">探索咖啡廳對話解鎖所有生活關鍵單字：</p>
+      <div id="j-grid" class="journal-grid"></div>
+    </div>
+  </div>
+
+  <!-- 雲端學習證據串接設定 Modal -->
+  <div id="cfg-modal" class="modal-shell hidden">
+    <div class="modal-card">
+      <div class="m-head">
+        <h3>⚙ Google 試算表學習證據串接設定</h3>
+        <button id="cfg-close" class="btn-h" type="button">✕ 關閉</button>
+      </div>
+      <div class="form-group">
+        <label>學員姓名／座號 (Learner ID)：</label>
+        <input type="text" id="input-learner-id" class="form-input" placeholder="例如：S01_陳小明 或 Mona_Explorer">
+      </div>
+      <div class="form-group">
+        <label>Google Apps Script (GAS) 網路應用程式網址：</label>
+        <input type="url" id="input-gas-url" class="form-input" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
+        <p class="form-tip">提示：請在 Google 試算表中部署 Apps Script 為「網路應用程式」，並設定「誰可以存取：任何人」。</p>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+        <button id="cfg-save" class="btn-h" style="background:#2e7d32; border-color:#00e676; font-weight:bold;" type="button">儲存設定</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =====================================================================
+       學習證據追蹤器 (Learning Evidence Tracker)
+       ===================================================================== */
+    const Tracker = {
+      gasUrl: localStorage.getItem("CAFE_GAS_URL") || "",
+      learnerId: localStorage.getItem("CAFE_LEARNER_ID") || "訪客學員",
+      startTime: Date.now(),
+      stageStartTime: Date.now(),
+      stageAttempts: {},
+      actionLogs: [],
+
+      init() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("id")) {
+          this.learnerId = urlParams.get("id");
+          localStorage.setItem("CAFE_LEARNER_ID", this.learnerId);
+        }
+        document.getElementById("badge-learner").textContent = "👤 " + this.learnerId;
+      },
+
+      startStage() {
+        this.stageStartTime = Date.now();
+      },
+
+      logAction(scene, stageId, stageTitle, chosenText, isCorrect) {
+        const respSec = Math.round(((Date.now() - this.stageStartTime) / 1000) * 10) / 10;
+        const attempts = this.stageAttempts[stageId] || 0;
+        const isFirst = attempts === 0;
+        this.stageAttempts[stageId] = attempts + 1;
+
+        const entry = {
+          timestamp: new Date().toISOString(),
+          scene: scene,
+          stageTitle: stageTitle,
+          chosenText: chosenText,
+          isFirstAttempt: isFirst,
+          isCorrect: isCorrect,
+          responseTimeSec: respSec
+        };
+        this.actionLogs.push(entry);
+        this.stageStartTime = Date.now();
+      },
+
+      async submitEvidence(affection, unlockedList) {
+        const totalDurationSec = Math.round((Date.now() - this.startTime) / 1000);
+        const firstAttempts = this.actionLogs.filter(l => l.isFirstAttempt);
+        const firstCorrect = firstAttempts.filter(l => l.isCorrect).length;
+        const firstTryAccuracy = firstAttempts.length > 0 ? (firstCorrect / firstAttempts.length) : 0;
+        const scaffoldingCount = this.actionLogs.filter(l => !l.isCorrect).length;
+
+        const payload = {
+          summary: {
+            learnerId: this.learnerId,
+            affection: affection,
+            firstTryAccuracy: firstTryAccuracy,
+            scaffoldingCount: scaffoldingCount,
+            unlockedCount: unlockedList.length,
+            vocabList: unlockedList,
+            totalDurationSec: totalDurationSec,
+            submittedAt: new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })
+          },
+          actionLogs: this.actionLogs
+        };
+
+        const history = JSON.parse(localStorage.getItem("CAFE_EVIDENCE_LOCAL") || "[]");
+        history.push(payload);
+        localStorage.setItem("CAFE_EVIDENCE_LOCAL", JSON.stringify(history));
+
+        if (!this.gasUrl) {
+          alert("【學習成果已儲存於本機】\n尚未設定 Google 試算表 Web App 網址，您可在右上角「⚙ 雲端串接」填入網址以即時同步！");
+          return;
+        }
+
+        try {
+          await fetch(this.gasUrl, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          });
+          alert("🎉【學習證據成功傳送】\n您的點餐決策與學習紀錄已同步寫入 Google 試算表！");
+        } catch (err) {
+          console.error("GAS 傳送失敗:", err);
+          alert("⚠️ 雲端傳送暫時失敗，學習證據已完整保存在本機手帳中。");
+        }
+      }
+    };
+
+    /* =====================================================================
+       Web Audio 音效合成器
+       ===================================================================== */
+    const Sound = {
+      ctx: null, muted: false,
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+        if (this.ctx && this.ctx.state === "suspended") this.ctx.resume();
+      },
+      blip() {
+        if (this.muted) return; this.init(); if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator(); const g = this.ctx.createGain();
+          osc.type = "sine"; osc.frequency.setValueAtTime(450 + Math.random() * 80, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.04);
+          g.gain.setValueAtTime(0.04, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+          osc.connect(g); g.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.04);
+        } catch(e) {}
+      },
+      chime() {
+        if (this.muted) return; this.init(); if (!this.ctx) return;
+        try {
+          [659.25, 523.25].forEach((f, i) => {
+            const osc = this.ctx.createOscillator(); const g = this.ctx.createGain();
+            osc.type = "sine"; osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.18);
+            g.gain.setValueAtTime(0.08, this.ctx.currentTime + i * 0.18);
+            g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.18 + 0.4);
+            osc.connect(g); g.connect(this.ctx.destination); osc.start(this.ctx.currentTime + i * 0.18); osc.stop(this.ctx.currentTime + i * 0.18 + 0.4);
+          });
+        } catch(e) {}
+      },
+      success() {
+        if (this.muted) return; this.init(); if (!this.ctx) return;
+        try {
+          [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+            const osc = this.ctx.createOscillator(); const g = this.ctx.createGain();
+            osc.type = "triangle"; osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.08);
+            g.gain.setValueAtTime(0.08, this.ctx.currentTime + i * 0.08);
+            g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.08 + 0.25);
+            osc.connect(g); g.connect(this.ctx.destination); osc.start(this.ctx.currentTime + i * 0.08); osc.stop(this.ctx.currentTime + i * 0.08 + 0.25);
+          });
+        } catch(e) {}
+      },
+      misunderstand() {
+        if (this.muted) return; this.init(); if (!this.ctx) return;
+        try {
+          const osc = this.ctx.createOscillator(); const g = this.ctx.createGain();
+          osc.type = "sawtooth"; osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(170, this.ctx.currentTime + 0.25);
+          g.gain.setValueAtTime(0.06, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+          osc.connect(g); g.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.25);
+        } catch(e) {}
+      },
+      coin() {
+        if (this.muted) return; this.init(); if (!this.ctx) return;
+        try {
+          [987.77, 1318.51].forEach((f, i) => {
+            const osc = this.ctx.createOscillator(); const g = this.ctx.createGain();
+            osc.type = "sine"; osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.07);
+            g.gain.setValueAtTime(0.1, this.ctx.currentTime + i * 0.07);
+            g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.07 + 0.3);
+            osc.connect(g); g.connect(this.ctx.destination); osc.start(this.ctx.currentTime + i * 0.07); osc.stop(this.ctx.currentTime + i * 0.07 + 0.3);
+          });
+        } catch(e) {}
+      }
+    };
+
+    /* =====================================================================
+       生活單字庫與雙階段劇本
+       ===================================================================== */
+    const VOCABULARY = [
+      { id: "hitori", kanji: "一人", kana: "ひとり", meaning: "一個人 (人數)", cat: "櫃台點餐" },
+      { id: "tennai", kanji: "店内", kana: "てんない", meaning: "店內／內用", cat: "櫃台點餐" },
+      { id: "mochikaeri", kanji: "お持ち帰り", kana: "おもちかえり", meaning: "外帶", cat: "櫃台點餐" },
+      { id: "aisu", kanji: "アイス", kana: "アイス", meaning: "冰飲 (Ice)", cat: "櫃台點餐" },
+      { id: "hitotsu", kanji: "一つ", kana: "ひとつ", meaning: "一個 (物品量詞)", cat: "櫃台點餐" },
+      { id: "okaikei", kanji: "お会計", kana: "おかいけい", meaning: "結帳／買單", cat: "櫃台點餐" },
+      { id: "denshi", kanji: "電子マネー", kana: "でんしまねー", meaning: "電子支付／交通卡", cat: "櫃台點餐" },
+      { id: "omatase", kanji: "お待たせしました", kana: "おまたせしました", meaning: "讓您久等了", cat: "座位生活" },
+      { id: "sorou", kanji: "揃う", kana: "そろう", meaning: "齊全／到齊", cat: "座位生活" },
+      { id: "itadakimasu", kanji: "いただきます", kana: "いただきます", meaning: "我開動了 (餐前禮節)", cat: "座位生活" },
+      { id: "oishii", kanji: "美味しい", kana: "おいしい", meaning: "好吃的／美味的", cat: "座位生活" },
+      { id: "ohiya", kanji: "お冷", kana: "おひや", meaning: "冰水 (餐廳用紙)", cat: "座位生活" },
+      { id: "sumimasen", kanji: "すみません", kana: "すみません", meaning: "不好意思 (呼喚/道歉)", cat: "座位生活" },
+      { id: "gochisou", kanji: "ごちそうさまでした", kana: "ごちそうさまでした", meaning: "多謝款待 (餐後禮節)", cat: "座位生活" }
+    ];
+
+    const COUNTER_STAGES = [
+      {
+        id: "c_0",
+        prompt: "いらっしゃいませ！何名様ですか？",
+        promptFurigana: "いらっしゃいませ！[何名様:なんめいさま]ですか？",
+        sub: "歡迎光臨！請問幾位呢？",
+        options: [
+          {
+            text: "一人です。（ひとりです。）", sub: "一位。", correct: true,
+            reaction: "かしこまりました！", reactionSub: "好的！", vocab: ["hitori"]
+          },
+          {
+            text: "一つです。（ひとつです。）", sub: "一個。（物品量詞）", correct: false,
+            reaction: "ふふっ、お客様は「物」じゃないですよ〜！人は「一人（ひとり）」と言いますよ。", reactionSub: "呵呵，客人您不是「物品」啦～！形容人的話要說「一人（ひとり）」喔！",
+            sc: {
+              title: "💡 量詞鷹架：人 vs 物品",
+              exp: "「一つ（ひとつ）」是用來數無生命物品或餐點的；數人數時必須用特殊量詞：\n• 1人：一人（ひとり）\n• 2人：二人（ふたり）\n• 3人以上：三人（さんにん）",
+              hint: "自己一人來店，請選「一人です」！"
+            }
+          }
+        ]
+      },
+      {
+        id: "c_1",
+        prompt: "店内でお召し上がりですか？それとも、お持ち帰りですか？",
+        promptFurigana: "[店内:てんない]でお[召:め]し[上:あ]がりですか？それとも、お[持:も]ち[帰:かえ]りですか？",
+        sub: "請問要在店內享用，還是外帶呢？",
+        options: [
+          {
+            text: "店内でお願いします。（てんないでおねがいします。）", sub: "在店內享用，麻煩了。", correct: true,
+            reaction: "ありがとうございます！店内のご注文を承りますね。", reactionSub: "非常感謝！為您記錄店內點餐。",
+            vocab: ["tennai"]
+          },
+          {
+            text: "はい、食べます。（はい、たべます。）", sub: "好，我會吃。", correct: false,
+            reaction: "あはは！もちろん美味しく食べてほしいですが、店内で食べますか？それとも持って帰りますか？", reactionSub: "哈哈！當然希望您吃得美味，但我是問要在店裡吃、還是帶走呢？",
+            sc: {
+              title: "💡 選擇疑問句二選一",
+              exp: "面對「Aですか、それともBですか（是A呢還是B呢？）」，不能只回答「はい（是）」，要選出具體項目：\n• 店内で（在店內）\n• お持ち帰りで（外帶）",
+              hint: "今天要坐下體驗咖啡廳，請選「店内でお願いします」！"
+            }
+          }
+        ]
+      },
+      {
+        id: "c_2",
+        prompt: "ご注文はお決まりですか？温かいのと冷たいの、どちらになさいますか？",
+        promptFurigana: "ご[注文:ちゅうもん]はお[決:き]まりですか？[温:あたた]かいのと[冷:つめ]たいの、どちらになさいますか？",
+        sub: "決定好點餐了嗎？請問要熱的還是冰的呢？",
+        options: [
+          {
+            text: "アイスコーヒーを一つください。（あいすこーひーを ひとつ ください。）", sub: "請給我一杯冰咖啡。", correct: true,
+            reaction: "アイスコーヒーですね！自家焙煎の深煎り豆でお淹れしますね。", reactionSub: "冰咖啡一份好的！為您用自家烘焙的深焙豆沖煮。",
+            vocab: ["aisu", "hitotsu"]
+          },
+          {
+            text: "水は美味しいです。（みずは おいしいです。）", sub: "水很好喝。", correct: false,
+            reaction: "お水、気に入っていただけて嬉しいですが…！コーヒーのご注文はいかがでしょうか？", reactionSub: "水合您的胃口真開心！不過您想點哪款咖啡呢…？",
+            sc: {
+              title: "💡 點餐基本公式：〜をください",
+              exp: "點餐時最自然的句型：\n👉 【品名】＋ を ＋【數量詞】＋ ください / お願いします",
+              hint: "選擇「アイスコーヒーを一つください」來點咖啡吧！"
+            }
+          }
+        ]
+      },
+      {
+        id: "c_3",
+        prompt: "お会計は合計で 650円 になります。お支払いはどうなさいますか？",
+        promptFurigana: "お[会計:かいけい]は[合計:ごうけい]で 650[円:えん] になります。お[支払:しはら]いはどうなさいますか？",
+        sub: "結帳總共是 650 日圓。請問要如何付款呢？",
+        options: [
+          {
+            text: "電子マネーで払えますか？（でんしまねーで はらえますか？）", sub: "可以用電子支付／交通IC卡付款嗎？", correct: true,
+            reaction: "はい！ピッとタッチしてください。お会計完了です！", reactionSub: "可以！請逼一下感應。結帳完成！",
+            vocab: ["okaikei", "denshi"]
+          },
+          {
+            text: "現金でお願いします。（げんきんで おねがいします。）", sub: "麻煩用現金。", correct: true,
+            reaction: "ちょうど650円お預かりします！レシートをどうぞ。", reactionSub: "收您剛好 650 日圓！這是您的收據。",
+            vocab: ["okaikei"]
+          },
+          {
+            text: "お会計は安いです。（おかいけいは やすいです。）", sub: "結帳很便宜。", correct: false,
+            reaction: "ふふ、お褒めいただき光栄ですが…！現金かカード、どちらでお支払いされますか？", reactionSub: "呵呵，能被誇獎價格親民很榮幸…！不過請問您想用現金還是卡片付款呢？",
+            sc: {
+              title: "💡 支付方式表達文法：〜で",
+              exp: "表示「以某種手段／方式付款」時，助詞要用 で：\n• 現金で（用現金）\n• 電子マネーで（用電子支付）",
+              hint: "選擇「現金で」或「電子マネーで」回答！"
+            }
+          }
+        ]
+      }
+    ];
+
+    const SEATED_STAGES = [
+      {
+        id: "s_0",
+        prompt: "お待たせいたしました！アイスコーヒーとケーキでございます。ご注文はお揃いでしょうか？",
+        promptFurigana: "お[待:ま]たせいたしました！アイスコーヒーとケーキでございます。ご[注文:ちゅうもん]はお[揃:そろ]いでしょうか？",
+        sub: "讓您久等了！這是您的冰咖啡與蛋糕。餐點都到齊了嗎？",
+        options: [
+          {
+            text: "はい、揃っています。ありがとうございます。（はい、そろっています。）", sub: "好的，都到齊了。非常感謝。", correct: true,
+            reaction: "ごゆっくりお召し上がりくださいませ！", reactionSub: "請慢用！", vocab: ["omatase", "sorou"]
+          },
+          {
+            text: "いいえ、まだ食べていません。（いいえ、まだ たべていません。）", sub: "不，我還沒吃。", correct: false,
+            reaction: "あはは！今お持ちしたばかりですからね！「お揃い」是在確認您點的餐點是不是都到齊了喔～！", reactionSub: "哈哈！因為才剛送上來嘛！「お揃い」是在確認您點的餐點是不是都到齊了喔～！",
+            sc: {
+              title: "💡 餐廳實用字：お揃い (そろい)",
+              exp: "店員常問的「ご注文はお揃いでしょうか？」意思是：\n👉 「您點的餐點都到齊了嗎？」\n• 若齊全：はい、揃っています（是的，都到齊了）\n• 若缺項：まだ〇〇が来ていません（〇〇還沒來）",
+              hint: "若餐點都送上了，請回答「はい、揃っています」！"
+            }
+          }
+        ]
+      },
+      {
+        id: "s_1",
+        prompt: "摩爾加納提醒：在日本用餐開動前，該說哪句重要的生活禮儀問候呢？",
+        promptFurigana: "食事を[始:はじ]める[前:まえ]の挨拶をしましょう！",
+        sub: "在享用美味餐點前，向食物與做餐者表達感謝吧！",
+        options: [
+          {
+            text: "いただきます！（いただきます！）", sub: "我開動了！（領受這頓餐點）", correct: true,
+            reaction: "どうぞ、召し上がれ！当店の特製ケーキです！", reactionSub: "請開動吧！這是本店的特製蛋糕！",
+            vocab: ["itadakimasu", "oishii"]
+          },
+          {
+            text: "いってきます！（いってきます！）", sub: "我出門了！", correct: false,
+            reaction: "えっ！？今からお出かけですか！？まずは食べてからにしてください〜（笑）！", reactionSub: "咦！？您現在要出門去嗎！？至少先吃完再出發啦～（笑）！",
+            sc: {
+              title: "💡 常用問候混淆：開動 vs 出門",
+              exp: "• いただきます：我開動了（用餐前）\n• いってきます：我出門了（離開家門時）\n• ただいま：我回來了",
+              hint: "用餐前一定要說「いただきます」喔！"
+            }
+          }
+        ]
+      },
+      {
+        id: "s_2",
+        prompt: "吃著蛋糕口渴，想請路過的店員加一杯冰水，該如何禮貌表達呢？",
+        promptFurigana: "店員さんに[水:みず]を[頼:たの]んでみましょう！",
+        sub: "請向店員禮貌地索取一杯常溫或冰水（お冷）。",
+        options: [
+          {
+            text: "すみません、お冷をもう一杯いただけますか？（すみません、おひやを もういっぱいただけますか？）", sub: "不好意思，能再給我一杯冰水嗎？", correct: true,
+            reaction: "かしこまりました！冷たいお水をすぐお持ちしますね。", reactionSub: "好的！馬上為您送上冰水。",
+            vocab: ["sumimasen", "ohiya"]
+          },
+          {
+            text: "水を買いたいです！（みずを かいたいです！）", sub: "我想買水！", correct: false,
+            reaction: "ふふ、日本のお店ではお冷（お水）は無料ですよ〜！「お冷をください」とおっしゃっていただければ大丈夫です！", reactionSub: "呵呵，在日本的喫茶店裡，冰水（お冷）是免費招待的喔！只要說「お冷をください」就可以囉！",
+            sc: {
+              title: "💡 餐廳專用語：お冷 (おひや)",
+              exp: "在日式餐廳／咖啡廳中：\n• 免費提供的冰水通常稱為 お冷（おひや）\n• 禮貌索取請求句：〜をいただけますか（能給我～嗎？）",
+              hint: "使用「すみません、お冷を〜」是道地又有禮貌的說法！"
+            }
+          }
+        ]
+      },
+      {
+        id: "s_3",
+        prompt: "餐點都吃完了，準備離席時，該向店員說哪句表達感謝的話呢？",
+        promptFurigana: "食事を[終:お]わらせて、[感謝:かんしゃ]を[伝:つた]えましょう！",
+        sub: "用餐結束離席時，表達多謝款待與美味之意。",
+        options: [
+          {
+            text: "ごちそうさまでした！とても美味しかったです。（ごちそうさまでした！とても おいしかったです。）", sub: "多謝款待！真的非常美味。", correct: true,
+            reaction: "ありがとうございます！またのご来店を心よりお待ちしております！", reactionSub: "非常感謝！衷心期待您再次光臨！",
+            vocab: ["gochisou"]
+          },
+          {
+            text: "さようなら、二度と来ません。（さようなら、にどときません。）", sub: "再見，我不會再來第二次了。", correct: false,
+            reaction: "えええっ！？何か至らない点がございましたでしょうか…！？ショックです…！", reactionSub: "咦咦咦！？是哪裡做得不夠好嗎…！？太震驚了…！",
+            sc: {
+              title: "💡 餐後禮貌金句：ごちそうさまでした",
+              exp: "日本文化中，吃完飯離開時最美麗的問候：\n👉 ごちそうさ突破了！ごちそうさまでした（多謝款待）\n可以加上「美味しかったです（很好吃）」讓店員超開心！",
+              hint: "選擇「ごちそうさまでした」向店員道謝吧！"
+            }
+          }
+        ]
+      }
+    ];
+
+    /* =====================================================================
+       2D 輕量遊戲引擎 (雙階段任務狀態機)
+       ===================================================================== */
+    const canvas = document.getElementById("game-canvas");
+    const ctx = canvas.getContext("2d");
+
+    const STATE_GOTO_COUNTER = 1;
+    const STATE_AT_COUNTER = 2;
+    const STATE_GOTO_SEAT = 3;
+    const STATE_AT_SEAT = 4;
+    const STATE_COMPLETED = 5;
+
+    let gameState = STATE_GOTO_COUNTER;
+
+    const player = { x: 320, y: 430, w: 24, h: 24, vx: 0, vy: 0, dir: "up" };
+    const barista = { x: 260, y: 110, w: 32, h: 32 };
+    const targetSeat = { x: 140, y: 340 };
+
+    let affection = 20;
+    const unlockedVocabs = new Set();
+    let currentStageIndex = 0;
+    let activeScenarioStages = COUNTER_STAGES;
+    let inDialogue = false;
+    let hasDeliveredFood = false;
+    let seatPulseAngle = 0;
+
+    const qStep = document.getElementById("q-step");
+    const qText = document.getElementById("q-text");
+    const qIcon = document.getElementById("q-icon");
+
+    const keys = {};
+    window.addEventListener("keydown", e => {
+      keys[e.key.toLowerCase()] = true;
+      if (e.code === "Space") handleInteract();
+    });
+    window.addEventListener("keyup", e => { keys[e.key.toLowerCase()] = false; });
+
+    const setupDir = (id, dx, dy) => {
+      const b = document.getElementById(id);
+      const set = (v) => { player.vx = v ? dx * 3.2 : 0; player.vy = v ? dy * 3.2 : 0; if (v) updateDir(dx, dy); };
+      b.addEventListener("mousedown", () => set(true)); b.addEventListener("mouseup", () => set(false));
+      b.addEventListener("touchstart", (e) => { e.preventDefault(); set(true); }, {passive:false});
+      b.addEventListener("touchend", () => set(false));
+    };
+    setupDir("btn-up", 0, -1); setupDir("btn-down", 0, 1); setupDir("btn-left", -1, 0); setupDir("btn-right", 1, 0);
+    document.getElementById("btn-interact").addEventListener("click", handleInteract);
+
+    function updateDir(dx, dy) {
+      if (dy < 0) player.dir = "up";
+      else if (dy > 0) player.dir = "down";
+      else if (dx < 0) player.dir = "left";
+      else if (dx > 0) player.dir = "right";
+    }
+
+    function loop() {
+      update();
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    function update() {
+      seatPulseAngle += 0.05;
+      if (inDialogue) return;
+
+      let dx = 0, dy = 0;
+      if (keys["w"] || keys["arrowup"]) dy -= 1;
+      if (keys["s"] || keys["arrowdown"]) dy += 1;
+      if (keys["a"] || keys["arrowleft"]) dx -= 1;
+      if (keys["d"] || keys["arrowright"]) dx += 1;
+
+      if (dx !== 0 || dy !== 0) {
+        updateDir(dx, dy);
+        const len = Math.hypot(dx, dy);
+        player.x += (dx / len) * 3.2;
+        player.y += (dy / len) * 3.2;
+      } else {
+        player.x += player.vx;
+        player.y += player.vy;
+      }
+
+      player.x = Math.max(30, Math.min(610, player.x));
+      player.y = Math.max(160, Math.min(450, player.y));
+    }
+
+    function render() {
+      // 1. 木質地板
+      ctx.fillStyle = "#3e2723";
+      ctx.fillRect(0, 0, 640, 480);
+      for (let y = 0; y < 480; y += 32) {
+        ctx.fillStyle = (y % 64 === 0) ? "#4e342e" : "#432b26";
+        ctx.fillRect(0, y, 640, 30);
+      }
+
+      // 2. 復古地毯
+      ctx.fillStyle = "#7f2222";
+      ctx.fillRect(180, 240, 280, 160);
+      ctx.strokeStyle = "#ffd54f";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(185, 245, 270, 150);
+
+      // 3. 後牆面
+      ctx.fillStyle = "#1b1424";
+      ctx.fillRect(0, 0, 640, 100);
+      ctx.fillStyle = "#2a1f38";
+      ctx.fillRect(0, 95, 640, 8);
+
+      // 4. 咖啡吧台
+      ctx.fillStyle = "#5d4037";
+      ctx.fillRect(120, 100, 360, 50);
+      ctx.fillStyle = "#8d6e63";
+      ctx.fillRect(120, 100, 360, 12);
+
+      // 咖啡機 & 糕點櫃
+      ctx.fillStyle = "#90a4ae"; ctx.fillRect(180, 80, 40, 30);
+      ctx.fillStyle = "#cfd8dc"; ctx.fillRect(185, 75, 30, 6);
+      ctx.fillStyle = "#00e676"; ctx.fillRect(184, 85, 4, 4);
+
+      ctx.fillStyle = "rgba(129, 212, 250, 0.4)"; ctx.fillRect(360, 85, 50, 25);
+      ctx.strokeStyle = "#81d4fa"; ctx.strokeRect(360, 85, 50, 25);
+      ctx.fillStyle = "#4caf50"; ctx.fillRect(370, 95, 10, 10);
+      ctx.fillStyle = "#795548"; ctx.fillRect(390, 95, 10, 10);
+
+      // 5. 座位發光引導圈
+      if (gameState === STATE_GOTO_SEAT) {
+        const pulse = Math.sin(seatPulseAngle) * 6;
+        ctx.strokeStyle = "#ffd54f";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(targetSeat.x, targetSeat.y, 34 + pulse, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(255, 213, 79, 0.2)";
+        ctx.beginPath();
+        ctx.arc(targetSeat.x, targetSeat.y, 34 + pulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffd54f";
+        ctx.font = "bold 18px sans-serif";
+        ctx.fillText("▼ 入座", targetSeat.x - 24, targetSeat.y - 45 + pulse * 0.5);
+      }
+
+      // 6. 咖啡桌椅
+      drawTable(targetSeat.x, targetSeat.y, hasDeliveredFood);
+      drawTable(500, 320, false);
+
+      // 7. 植物裝飾
+      drawPlant(40, 140);
+      drawPlant(600, 140);
+
+      // 8. NPC 店員 Rin
+      if (gameState === STATE_AT_SEAT) {
+        drawBarista(targetSeat.x + 40, targetSeat.y - 10);
+      } else {
+        drawBarista(barista.x, barista.y);
+      }
+
+      // 9. 主角摩爾加納
+      drawPlayer(player.x, player.y, player.dir);
+
+      // 10. 互動氣泡
+      drawInteractBubbles();
+    }
+
+    function drawInteractBubbles() {
+      if (inDialogue) return;
+
+      if (gameState === STATE_GOTO_COUNTER) {
+        const dist = Math.hypot(player.x - barista.x, player.y - 150);
+        if (dist < 75) {
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.roundRect(barista.x - 22, barista.y - 40, 44, 22, 5);
+          ctx.fill();
+          ctx.fillStyle = "#d50000";
+          ctx.font = "bold 12px sans-serif";
+          ctx.fillText("點餐 !", barista.x - 16, barista.y - 25);
+        }
+      } else if (gameState === STATE_GOTO_SEAT) {
+        const distToSeat = Math.hypot(player.x - targetSeat.x, player.y - targetSeat.y);
+        if (distToSeat < 60) {
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.roundRect(targetSeat.x - 24, targetSeat.y - 50, 48, 22, 5);
+          ctx.fill();
+          ctx.fillStyle = "#2e7d32";
+          ctx.font = "bold 12px sans-serif";
+          ctx.fillText("坐下 🪑", targetSeat.x - 20, targetSeat.y - 35);
+        }
+      }
+    }
+
+    function drawTable(x, y, hasFood) {
+      ctx.fillStyle = "#6d4c41"; ctx.beginPath(); ctx.arc(x, y, 22, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#8d6e63"; ctx.beginPath(); ctx.arc(x, y, 18, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#2e7d32"; ctx.beginPath(); ctx.arc(x - 28, y, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + 28, y, 9, 0, Math.PI * 2); ctx.fill();
+
+      if (hasFood) {
+        ctx.fillStyle = "#81d4fa"; ctx.fillRect(x - 10, y - 8, 8, 12);
+        ctx.fillStyle = "#3e2723"; ctx.fillRect(x - 9, y - 5, 6, 8);
+        ctx.fillStyle = "#2e7d32"; ctx.fillRect(x + 2, y - 6, 10, 8);
+        ctx.fillStyle = "#fff"; ctx.fillRect(x + 2, y - 2, 10, 2);
+      }
+    }
+
+    function drawPlant(x, y) {
+      ctx.fillStyle = "#d87d4a"; ctx.fillRect(x - 12, y, 24, 20);
+      ctx.fillStyle = "#2e7d32"; ctx.beginPath(); ctx.arc(x, y - 10, 16, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#4caf50"; ctx.beginPath(); ctx.arc(x + 4, y - 14, 10, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function drawBarista(x, y) {
+      ctx.fillStyle = "#3e2723";
+      ctx.beginPath(); ctx.moveTo(x - 10, y - 6); ctx.lineTo(x - 15, y - 18); ctx.lineTo(x - 5, y - 10); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x + 10, y - 6); ctx.lineTo(x + 15, y - 18); ctx.lineTo(x + 5, y - 10); ctx.fill();
+      ctx.fillStyle = "#4e342e"; ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#ffe0bd"; ctx.beginPath(); ctx.arc(x, y + 2, 10, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#3e2723"; ctx.fillRect(x - 5, y, 3, 2); ctx.fillRect(x + 2, y, 3, 2);
+      ctx.fillStyle = "#263238"; ctx.fillRect(x - 10, y + 14, 20, 16);
+    }
+
+    function drawPlayer(x, y, dir) {
+      ctx.fillStyle = "#1a1a24";
+      ctx.beginPath(); ctx.moveTo(x - 8, y - 6); ctx.lineTo(x - 12, y - 18); ctx.lineTo(x - 4, y - 9); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x + 8, y - 6); ctx.lineTo(x + 12, y - 18); ctx.lineTo(x + 4, y - 9); ctx.fill();
+      ctx.fillStyle = "#1a1a24"; ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2); ctx.fill();
+      if (dir !== "up") {
+        ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.ellipse(x, y + 3, 7, 5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#00b0ff"; ctx.beginPath(); ctx.arc(x - 4, y - 1, 3, 0, Math.PI * 2); ctx.arc(x + 4, y - 1, 3, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = "#ffd600"; ctx.fillRect(x - 7, y + 9, 14, 3);
+      ctx.fillStyle = "#d50000"; ctx.fillRect(x - 8, y + 12, 16, 12);
+    }
+
+    /* =====================================================================
+       互動與對話事件處理
+       ===================================================================== */
+    const dlgBox = document.getElementById("dlg-box");
+    const dlgPrompt = document.getElementById("dlg-prompt");
+    const dlgSub = document.getElementById("dlg-sub");
+    const dlgOpts = document.getElementById("dlg-opts");
+    const affFill = document.getElementById("aff-fill");
+    const affTxt = document.getElementById("aff-txt");
+
+    const scModal = document.getElementById("sc-modal");
+    const scMis = document.getElementById("sc-mis");
+    const scText = document.getElementById("sc-text");
+    const scHint = document.getElementById("sc-hint");
+    document.getElementById("sc-retry").addEventListener("click", () => {
+      scModal.classList.add("hidden");
+      renderStage();
+    });
+
+    function handleInteract() {
+      if (inDialogue) return;
+
+      if (gameState === STATE_GOTO_COUNTER) {
+        const dist = Math.hypot(player.x - barista.x, player.y - 150);
+        if (dist < 85) {
+          gameState = STATE_AT_COUNTER;
+          activeScenarioStages = COUNTER_STAGES;
+          currentStageIndex = 0;
+          startDialogue();
+        }
+      } else if (gameState === STATE_GOTO_SEAT) {
+        const distToSeat = Math.hypot(player.x - targetSeat.x, player.y - targetSeat.y);
+        if (distToSeat < 65) {
+          player.x = targetSeat.x - 28;
+          player.y = targetSeat.y;
+          player.dir = "right";
+
+          gameState = STATE_AT_SEAT;
+          hasDeliveredFood = true;
+          activeScenarioStages = SEATED_STAGES;
+          currentStageIndex = 0;
+
+          qIcon.textContent = "🍰";
+          qStep.textContent = "步驟 3";
+          qText.textContent = "餐點已送達！在座位上品嚐餐點，展開生活實用語對話。";
+
+          Sound.chime();
+          startDialogue();
+        }
+      }
+    }
+
+    function startDialogue() {
+      inDialogue = true;
+      Sound.chime();
+      dlgBox.classList.remove("hidden");
+      renderStage();
+    }
+
+    function renderStage() {
+      if (currentStageIndex >= activeScenarioStages.length) {
+        finishScenario();
+        return;
+      }
+      const st = activeScenarioStages[currentStageIndex];
+      Tracker.startStage();
+
+      dlgPrompt.innerHTML = formatRuby(st.promptFurigana || st.prompt);
+      dlgSub.textContent = st.sub;
+      dlgOpts.innerHTML = "";
+
+      st.options.forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt-btn";
+        btn.innerHTML = `
+          <span class="opt-num">${idx + 1}</span>
+          <div>
+            <span class="opt-jp">${opt.text}</span>
+            <small class="opt-sub">${opt.sub}</small>
+          </div>
+        `;
+        btn.addEventListener("click", () => handleChoice(st, opt));
+        dlgOpts.appendChild(btn);
+      });
+    }
+
+    function handleChoice(stage, opt) {
+      const sceneName = (gameState === STATE_AT_COUNTER) ? "Counter 櫃台" : "Table 座位";
+      Tracker.logAction(sceneName, stage.id, stage.sub, opt.text, opt.correct);
+
+      if (opt.correct) {
+        Sound.success();
+        affection = Math.min(100, affection + 12);
+        affFill.style.width = affection + "%";
+        affTxt.textContent = affection + "pt";
+        if (opt.vocab) opt.vocab.forEach(v => unlockedVocabs.add(v));
+        updateJournalUI();
+
+        showReaction(opt.reaction, opt.reactionSub, true);
+      } else {
+        Sound.misunderstand();
+        showReaction(opt.reaction, opt.reactionSub, false, opt.sc);
+      }
+    }
+
+    function showReaction(jp, sub, isCorrect, sc) {
+      dlgOpts.innerHTML = "";
+      dlgPrompt.innerHTML = `<span style="color:#80d8ff;">${jp}</span>`;
+      dlgSub.textContent = sub;
+
+      const next = document.createElement("button");
+      next.className = "opt-btn next-btn";
+      next.textContent = isCorrect ? "次へ進む (繼續) ➔" : "查看誤會鷹架解析 💡";
+      next.addEventListener("click", () => {
+        if (isCorrect) {
+          currentStageIndex++;
+          renderStage();
+        } else {
+          openScaffolding(sc, jp, sub);
+        }
+      });
+      dlgOpts.appendChild(next);
+    }
+
+    function openScaffolding(sc, jp, sub) {
+      scMis.innerHTML = `<strong>店員困惑的反應：</strong><p>「${jp}」</p><small>(${sub})</small>`;
+      scText.innerHTML = sc.exp.replace(/\n/g, "<br>");
+      scHint.innerHTML = `<strong>💡 解題秘訣：</strong> ${sc.hint}`;
+      scModal.classList.remove("hidden");
+    }
+
+    function finishScenario() {
+      inDialogue = false;
+      dlgBox.classList.add("hidden");
+
+      if (gameState === STATE_AT_COUNTER) {
+        gameState = STATE_GOTO_SEAT;
+        Sound.coin();
+        qIcon.textContent = "🪑";
+        qStep.textContent = "步驟 2";
+        qText.textContent = "點餐完成！請操作角色走到左側【發光的座位】入座稍候！";
+        alert("店員：「ご注文ありがとうございます！出来上がりましたらお席までお持ちしますので、空いているお席へどうぞ！」\n\n（點餐成功！請操作摩爾加納走到左側發光的座位入座！）");
+      } else if (gameState === STATE_AT_SEAT) {
+        gameState = STATE_COMPLETED;
+        Sound.coin();
+        qIcon.textContent = "🏆";
+        qStep.textContent = "任務全制霸";
+        qText.textContent = "恭喜完成喫茶店生活全體驗！已精通日本咖啡廳點餐與餐桌禮儀！";
+
+        Tracker.submitEvidence(affection, Array.from(unlockedVocabs));
+        openJournal();
+      }
+    }
+
+    function formatRuby(txt) {
+      return txt.replace(/\[([^:]+):([^\]]+)\]/g, "<ruby>$1<rt>$2</rt></ruby>");
+    }
+
+    /* =====================================================================
+       手帳與設定控制
+       ===================================================================== */
+    const jModal = document.getElementById("j-modal");
+    const jGrid = document.getElementById("j-grid");
+    document.getElementById("j-btn").addEventListener("click", openJournal);
+    document.getElementById("j-close").addEventListener("click", () => jModal.classList.add("hidden"));
+
+    function openJournal() {
+      Sound.blip();
+      updateJournalUI();
+      jModal.classList.remove("hidden");
+    }
+
+    function updateJournalUI() {
+      jGrid.innerHTML = "";
+      VOCABULARY.forEach(v => {
+        const has = unlockedVocabs.has(v.id);
+        const card = document.createElement("div");
+        card.className = "v-card " + (has ? "unlocked" : "locked");
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:#888;">
+            <span>${v.cat}</span><span>${has ? "✓" : "🔒"}</span>
+          </div>
+          <div class="v-kanji">${has ? v.kanji : "？？？"}</div>
+          <span class="v-kana">${has ? v.kana : "未探索"}</span>
+          <span class="v-mean">${has ? v.meaning : "———"}</span>
+        `;
+        jGrid.appendChild(card);
+      });
+    }
+
+    // 雲端串接設定
+    const cfgModal = document.getElementById("cfg-modal");
+    const inputLearner = document.getElementById("input-learner-id");
+    const inputGasUrl = document.getElementById("input-gas-url");
+
+    document.getElementById("cfg-btn").addEventListener("click", () => {
+      inputLearner.value = Tracker.learnerId;
+      inputGasUrl.value = Tracker.gasUrl;
+      cfgModal.classList.remove("hidden");
+    });
+    document.getElementById("badge-learner").addEventListener("click", () => {
+      inputLearner.value = Tracker.learnerId;
+      inputGasUrl.value = Tracker.gasUrl;
+      cfgModal.classList.remove("hidden");
+    });
+    document.getElementById("cfg-close").addEventListener("click", () => cfgModal.classList.add("hidden"));
+
+    document.getElementById("cfg-save").addEventListener("click", () => {
+      const name = inputLearner.value.trim() || "訪客學員";
+      const url = inputGasUrl.value.trim();
+      Tracker.learnerId = name;
+      Tracker.gasUrl = url;
+      localStorage.setItem("CAFE_LEARNER_ID", name);
+      localStorage.setItem("CAFE_GAS_URL", url);
+      document.getElementById("badge-learner").textContent = "👤 " + name;
+      cfgModal.classList.add("hidden");
+      alert("✅ 設定已儲存！後續點餐學習歷程將自動同步至指定 Google 試算表。");
+    });
+
+    const mBtn = document.getElementById("m-btn");
+    mBtn.addEventListener("click", () => {
+      Sound.muted = !Sound.muted;
+      mBtn.textContent = Sound.muted ? "🔇 靜音" : "🔊 音效";
+    });
+
+    Tracker.init();
+    loop();
+  </script>
+</body>
+</html>
